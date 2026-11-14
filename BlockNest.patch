@@ -93,7 +93,7 @@ index c54fc7e..e7087e4 100644
          targetSdk = 34
          versionCode = launcherVersionCode
 diff --git a/ZalithLauncher/gradle.properties b/ZalithLauncher/gradle.properties
-index 03f7f26..1dc4f39 100644
+index 03f7f26..63cfab0 100644
 --- a/ZalithLauncher/gradle.properties
 +++ b/ZalithLauncher/gradle.properties
 @@ -1,8 +1,8 @@
@@ -105,10 +105,26 @@ index 03f7f26..1dc4f39 100644
 +launcher_name=BlockNest
 +launcher_app_name=BlockNest
 +launcher_short_name=BN
-+url_home=https://github.com/yourname/BlockNest
++url_home=https://github.com/Huangqia123/ZalithLauncher2
  
  # your OAuth client id
  #oauth_client_id=xxx
+diff --git a/ZalithLauncher/src/main/java/com/movtery/zalithlauncher/path/UrlManager.kt b/ZalithLauncher/src/main/java/com/movtery/zalithlauncher/path/UrlManager.kt
+index a56dbe3..8914b08 100644
+--- a/ZalithLauncher/src/main/java/com/movtery/zalithlauncher/path/UrlManager.kt
++++ b/ZalithLauncher/src/main/java/com/movtery/zalithlauncher/path/UrlManager.kt
+@@ -50,9 +50,9 @@ const val URL_MCMOD: String = "https://www.mcmod.cn/"
+ const val URL_MINECRAFT_VERSION_REPOS: String = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
+ const val URL_MINECRAFT_ASSETS_INDEX: String = "https://launchermeta.mojang.com/v1/packages"
+ const val URL_MINECRAFT_PURCHASE = "https://www.xbox.com/games/store/minecraft-java-bedrock-edition-for-pc/9nxp44l49shj"
+-const val URL_PROJECT: String = "https://github.com/ZalithLauncher/ZalithLauncher2"
++const val URL_PROJECT: String = "https://github.com/Huangqia123/ZalithLauncher2"
+ const val URL_PROJECT_INFO: String = "https://api.github.com/repos/ZalithLauncher/Zalith-Info/contents/v2"
+-const val URL_COMMUNITY: String = "https://github.com/ZalithLauncher/ZalithLauncher2/graphs/contributors"
++const val URL_COMMUNITY: String = "https://github.com/Huangqia123/ZalithLauncher2/graphs/contributors"
+ const val URL_WEBLATE: String = "https://hosted.weblate.org/projects/zalithlauncher2"
+ const val URL_SUPPORT: String = "https://ifdian.net/a/MovTery"
+ const val URL_EASYTIER: String = "https://easytier.cn/"
 diff --git a/ZalithLauncher/src/main/java/com/movtery/zalithlauncher/ui/activities/VMActivity.kt b/ZalithLauncher/src/main/java/com/movtery/zalithlauncher/ui/activities/VMActivity.kt
 index 5550c59..7cf99bd 100644
 --- a/ZalithLauncher/src/main/java/com/movtery/zalithlauncher/ui/activities/VMActivity.kt
