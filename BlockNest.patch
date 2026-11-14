@@ -110,7 +110,7 @@ index 03f7f26..63cfab0 100644
  # your OAuth client id
  #oauth_client_id=xxx
 diff --git a/ZalithLauncher/src/main/java/com/movtery/zalithlauncher/path/UrlManager.kt b/ZalithLauncher/src/main/java/com/movtery/zalithlauncher/path/UrlManager.kt
-index a56dbe3..8914b08 100644
+index a56dbe3..a2c8c17 100644
 --- a/ZalithLauncher/src/main/java/com/movtery/zalithlauncher/path/UrlManager.kt
 +++ b/ZalithLauncher/src/main/java/com/movtery/zalithlauncher/path/UrlManager.kt
 @@ -50,9 +50,9 @@ const val URL_MCMOD: String = "https://www.mcmod.cn/"
@@ -118,9 +118,10 @@ index a56dbe3..8914b08 100644
  const val URL_MINECRAFT_ASSETS_INDEX: String = "https://launchermeta.mojang.com/v1/packages"
  const val URL_MINECRAFT_PURCHASE = "https://www.xbox.com/games/store/minecraft-java-bedrock-edition-for-pc/9nxp44l49shj"
 -const val URL_PROJECT: String = "https://github.com/ZalithLauncher/ZalithLauncher2"
-+const val URL_PROJECT: String = "https://github.com/Huangqia123/ZalithLauncher2"
- const val URL_PROJECT_INFO: String = "https://api.github.com/repos/ZalithLauncher/Zalith-Info/contents/v2"
+-const val URL_PROJECT_INFO: String = "https://api.github.com/repos/ZalithLauncher/Zalith-Info/contents/v2"
 -const val URL_COMMUNITY: String = "https://github.com/ZalithLauncher/ZalithLauncher2/graphs/contributors"
++const val URL_PROJECT: String = "https://github.com/Huangqia123/ZalithLauncher2"
++const val URL_PROJECT_INFO: String = "https://api.github.com/repos/Huangqia123/ZalithLauncher2/contents/update/v2"
 +const val URL_COMMUNITY: String = "https://github.com/Huangqia123/ZalithLauncher2/graphs/contributors"
  const val URL_WEBLATE: String = "https://hosted.weblate.org/projects/zalithlauncher2"
  const val URL_SUPPORT: String = "https://ifdian.net/a/MovTery"
@@ -179,6 +180,19 @@ index c1c6090..f4b4115 100644
  val onSecondaryDark = ColorTheme(Color(0xFF512214), Color(0xFF412A34), Color(0xFF263335), Color(0xFF113442), Color(0xFF343117), Color(0xFF303030), Color(0xFF1C361D))
  val secondaryContainerDark = ColorTheme(Color(0xFF643122), Color(0xFF4F3641), Color(0xFF333F41), Color(0xFF204250), Color(0xFF4B482C), Color(0xFF3D3D3D), Color(0xFF294329))
  val onSecondaryContainerDark = ColorTheme(Color(0xFFFFC8B9), Color(0xFFEBC7D5), Color(0xFFC5D3D6), Color(0xFFB4D6E8), Color(0xFFEAE3BE), Color(0xFFD3D0D0), Color(0xFFB9D9B5))
+diff --git a/ZalithLauncher/src/main/java/com/movtery/zalithlauncher/viewmodel/LauncherUpgradeViewModel.kt b/ZalithLauncher/src/main/java/com/movtery/zalithlauncher/viewmodel/LauncherUpgradeViewModel.kt
+index 93239c4..2cf79fe 100644
+--- a/ZalithLauncher/src/main/java/com/movtery/zalithlauncher/viewmodel/LauncherUpgradeViewModel.kt
++++ b/ZalithLauncher/src/main/java/com/movtery/zalithlauncher/viewmodel/LauncherUpgradeViewModel.kt
+@@ -82,7 +82,7 @@ sealed interface LauncherUpgradeOperation {
+  */
+ private const val LATEST_VERSION = "latest_version_md.json"
+ private const val LATEST_API_URL = "$URL_PROJECT_INFO/$LATEST_VERSION"
+-private const val LATEST_API_CHINESE_URL = "https://repo.miawa.cn/zalith-info/v2/$LATEST_VERSION"
++private const val LATEST_API_CHINESE_URL = "https://raw.githubusercontent.com/Huangqia123/ZalithLauncher2/main/update/v2/$LATEST_VERSION"
+ 
+ /**
+  * 用于记录启动器更新 ViewModel
 diff --git a/ZalithLauncher/src/main/java/org/lwjgl/glfw/CallbackBridge.java b/ZalithLauncher/src/main/java/org/lwjgl/glfw/CallbackBridge.java
 index 71466c7..9879a75 100644
 --- a/ZalithLauncher/src/main/java/org/lwjgl/glfw/CallbackBridge.java
@@ -4144,3 +4158,31 @@ index 36612b9..234eb61 100644
 \ No newline at end of file
 +    <color name="ic_launcher_background">#091C19</color>
 +</resources>
+diff --git a/update/v2/latest_version_md.json b/update/v2/latest_version_md.json
+new file mode 100644
+index 0000000..b5d4a44
+--- /dev/null
++++ b/update/v2/latest_version_md.json
+@@ -0,0 +1,22 @@
++{
++  "code": 200049,
++  "version": "2.7.2",
++  "created_at": "2026-11-14T17:30:00Z",
++  "default_cloud_drive": null,
++  "cloud_drives": [],
++  "files": [],
++  "default_body": {
++    "language": "zh_cn",
++    "markdown": "当前已是最新版本（BlockNest 衍生版）。\n\n本版本为 ZalithLauncher2 的衍生构建，更新源指向 Huangqia123/ZalithLauncher2。"
++  },
++  "bodies": [
++    {
++      "language": "zh_cn",
++      "markdown": "当前已是最新版本（BlockNest 衍生版）。"
++    },
++    {
++      "language": "en_us",
++      "markdown": "You are on the latest BlockNest build."
++    }
++  ]
++}
