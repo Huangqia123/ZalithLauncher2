@@ -17,7 +17,7 @@ jobs:
         run: |
           set -e
           mkdir -p out
-          gh run download 43580474252 -n BlockNest-debug-arm64 -D out --repo ${{ github.repository }}
+          gh run download 44849710142 -n BlockNest-debug-arm64 -D out --repo ${{ github.repository }}
           cd out
           ls -la
           rm -f *.crdownload || true
@@ -25,25 +25,32 @@ jobs:
       - name: Create release with APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v2.7.2-blocknest.1
-          name: "BlockNest 2.7.2 (衍生构建) — 修复关于页与更新源"
+          tag_name: v2.8.2-blocknest.2
+          name: "BlockNest 2.8.2 (衍生构建) — 内置 LittleSkin 登录 + 修复检查更新"
           prerelease: true
           body: |
-            ## BlockNest 2.7.2（基于 ZalithLauncher2 的衍生构建）
+            ## BlockNest 2.8.2（基于 ZalithLauncher2 的衍生构建）
 
-            本版本基于 [ZalithLauncher2](https://github.com/ZalithLauncher/ZalithLauncher2) 二次开发，遵循 GNU GPL v3。
+            本版本基于官方 **ZalithLauncher2 2.8.2（versionCode 200049）** 二次开发，遵循 GNU GPL v3。
 
-            ### 本次修复
-            - 设置 → 关于 → **项目地址**：改指向本仓库（不再跳官方 ZalithLauncher2）
-            - **检查更新**：更新源指向本仓库 `update/v2/latest_version_md.json`，不再调用官方 Zalith-Info 与 miawa.cn 镜像
-            - 已移除原仓库自带的官方 CI 工作流
+            ### 本次更新
+            - **账号登录列表内置 LittleSkin**：点「添加账号」第一项即为 LittleSkin，输入邮箱与密码即可登录；
+              无需再手动「添加认证服务器」并填写 API 地址。首次启动会自动登记进本地服务器表。
+            - **修复「获取更新失败，请稍后再试」**：更新信息改为多源顺序回退
+              （jsDelivr → ghfast 镜像 → raw.githubusercontent → GitHub Contents API），国内网络下也能正常检查更新。
+            - 补全仓库内缺失的 `update/v2/latest_version_md.json`（此前该文件不存在，导致更新源 404）。
+
+            ### 版本信息
+            - 显示名 BlockNest，包名 `com.blocknest.launcher`
+            - versionName `2.8.2-blocknest.2`，versionCode `200050`
+            - 底层源码为官方 2.8.2（200049）
 
             ### 安装包
-            - `BlockNest-Debug-2.7.2-arm64-v8a.apk`（arm64-v8a，适用于绝大多数现代安卓手机/平板）
-            - 包名 `com.blocknest.launcher`
+            - `BlockNest-Debug-2.8.2-arm64-v8a.apk`（arm64-v8a，适用于绝大多数现代安卓手机/平板）
             - 调试签名包，安装前请允许「未知来源」
 
             ### 说明
             - 应用名 BlockNest、全新图标、青绿主题色板
-            - 上游功能与协议保持一致，仅为界面与品牌层改造
+            - 上游功能与协议保持一致，仅为界面、品牌层与上述修复改造
+            完整修改声明见 `MODIFICATIONS.md`。
           files: out/*.apk
