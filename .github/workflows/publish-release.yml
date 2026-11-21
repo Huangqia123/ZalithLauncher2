@@ -22,7 +22,9 @@ jobs:
           ls -la
           rm -f *.crdownload || true
           apk=$(ls *.apk | head -1)
-          mv "$apk" BlockNest-2.8.2-blocknest.3-arm64-v8a.apk
+          if [ "$apk" != "BlockNest-2.8.2-blocknest.3-arm64-v8a.apk" ]; then
+            mv "$apk" BlockNest-2.8.2-blocknest.3-arm64-v8a.apk
+          fi
           ls -la
 
       - name: Create release with APK
