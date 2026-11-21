@@ -2,6 +2,9 @@ name: Build BlockNest APK
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/build-blocknest.yml'
 
 permissions:
   contents: read
@@ -57,13 +60,13 @@ jobs:
       - name: Build Debug APK (arm64)
         run: |
           chmod +x gradlew
-          ./gradlew ZalithLauncher:assembleDebug -Darch=arm64 --stacktrace
+          ./gradlew ZalithLauncher:assembleRelease -Darch=arm64 --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: BlockNest-debug-arm64
-          path: ZalithLauncher/build/outputs/apk/debug/*.apk
+          path: ZalithLauncher/build/outputs/apk/release/*.apk
           if-no-files-found: error
 
   build-all-arch:
@@ -108,10 +111,10 @@ jobs:
       - name: Build universal Debug APK
         run: |
           chmod +x gradlew
-          ./gradlew ZalithLauncher:assembleDebug -Darch=all --stacktrace
+          ./gradlew ZalithLauncher:assembleRelease -Darch=all --stacktrace
       - name: Upload universal APK
         uses: actions/upload-artifact@v4
         with:
           name: BlockNest-debug-universal
-          path: ZalithLauncher/build/outputs/apk/debug/*.apk
+          path: ZalithLauncher/build/outputs/apk/release/*.apk
           if-no-files-found: error
