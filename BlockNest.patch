@@ -23505,7 +23505,7 @@ index 98c3f9c..50eb903 100644
  
          onFinished()
 diff --git a/ZalithLauncher/src/main/java/com/movtery/zalithlauncher/viewmodel/LauncherUpgradeViewModel.kt b/ZalithLauncher/src/main/java/com/movtery/zalithlauncher/viewmodel/LauncherUpgradeViewModel.kt
-index 5499a78..2cf79fe 100644
+index 5499a78..0ce3a28 100644
 --- a/ZalithLauncher/src/main/java/com/movtery/zalithlauncher/viewmodel/LauncherUpgradeViewModel.kt
 +++ b/ZalithLauncher/src/main/java/com/movtery/zalithlauncher/viewmodel/LauncherUpgradeViewModel.kt
 @@ -43,7 +43,6 @@ import com.movtery.zalithlauncher.R
@@ -23524,16 +23524,21 @@ index 5499a78..2cf79fe 100644
  import com.movtery.zalithlauncher.utils.logging.Logger
  import com.movtery.zalithlauncher.utils.network.safeBodyAsJson
  import com.movtery.zalithlauncher.utils.network.withRetry
-@@ -82,7 +82,7 @@ sealed interface LauncherUpgradeOperation {
+@@ -82,7 +82,12 @@ sealed interface LauncherUpgradeOperation {
   */
  private const val LATEST_VERSION = "latest_version_md.json"
  private const val LATEST_API_URL = "$URL_PROJECT_INFO/$LATEST_VERSION"
 -private const val LATEST_API_CHINESE_URL = "https://repo.miawa.cn/zalith-info/v2/$LATEST_VERSION"
++/** 原始文件地址（中国大陆可能不可达，作为兜底） */
 +private const val LATEST_API_CHINESE_URL = "https://raw.githubusercontent.com/Huangqia123/ZalithLauncher2/main/update/v2/$LATEST_VERSION"
++/** jsDelivr CDN 镜像（中国大陆通常可直连） */
++private const val LATEST_API_JSDELIVR_URL = "https://cdn.jsdelivr.net/gh/Huangqia123/ZalithLauncher2@main/update/v2/$LATEST_VERSION"
++/** ghfast 加速镜像（透传 raw.githubusercontent.com） */
++private const val LATEST_API_MIRROR_URL = "https://ghfast.top/https://raw.githubusercontent.com/Huangqia123/ZalithLauncher2/main/update/v2/$LATEST_VERSION"
  
  /**
   * 用于记录启动器更新 ViewModel
-@@ -114,7 +114,7 @@ class LauncherUpgradeViewModel: ViewModel() {
+@@ -114,7 +119,7 @@ class LauncherUpgradeViewModel: ViewModel() {
       * 更新最后一次检查的时间
       */
      private fun updateLastCheckTime() {
@@ -23542,7 +23547,7 @@ index 5499a78..2cf79fe 100644
      }
  
      /**
-@@ -127,7 +127,7 @@ class LauncherUpgradeViewModel: ViewModel() {
+@@ -127,7 +132,7 @@ class LauncherUpgradeViewModel: ViewModel() {
              if (
                  isWithinRateLimit(
                      time = TimeUnit.HOURS.toMillis(1L),
@@ -23551,7 +23556,7 @@ index 5499a78..2cf79fe 100644
                  )
              ) {
                  Logger.info(TAG, "App start check: Within rate limit, skipping")
-@@ -138,7 +138,7 @@ class LauncherUpgradeViewModel: ViewModel() {
+@@ -138,7 +143,7 @@ class LauncherUpgradeViewModel: ViewModel() {
              if (data != null) {
                  checkForUpgrade(
                      data = data,
@@ -23560,7 +23565,7 @@ index 5499a78..2cf79fe 100644
                      ignoreDismissedVersions = true, //启动时检查忽略用户已忽略的版本
                      onUpgrade = { data ->
                          operation = LauncherUpgradeOperation.Upgrade(data)
-@@ -163,7 +163,7 @@ class LauncherUpgradeViewModel: ViewModel() {
+@@ -163,7 +168,7 @@ class LauncherUpgradeViewModel: ViewModel() {
              if (
                  isWithinRateLimit(
                      time = TimeUnit.SECONDS.toMillis(5L),
@@ -23569,7 +23574,7 @@ index 5499a78..2cf79fe 100644
                  )
              ) throw TooFrequentOperationException()
  
-@@ -173,7 +173,7 @@ class LauncherUpgradeViewModel: ViewModel() {
+@@ -173,7 +178,7 @@ class LauncherUpgradeViewModel: ViewModel() {
              if (data != null) {
                  checkForUpgrade(
                      data = data,
@@ -23578,6 +23583,73 @@ index 5499a78..2cf79fe 100644
                      ignoreDismissedVersions = false,
                      onUpgrade = { data ->
                          operation = LauncherUpgradeOperation.Upgrade(data)
+@@ -191,30 +196,47 @@ class LauncherUpgradeViewModel: ViewModel() {
+      */
+     private suspend fun fetchRemoteData(): RemoteData? {
+         return withContext(Dispatchers.IO) {
++            //按顺序尝试直接返回 JSON 的更新源：
++            //jsDelivr → ghfast 镜像 → raw.githubusercontent → GitHub Contents API
++            //避免只依赖 GitHub API（限流 403）或 raw 源（中国大陆不可达）而弹出“无法检测加载，请重试”
++            val directUrls = listOf(
++                LATEST_API_JSDELIVR_URL,
++                LATEST_API_MIRROR_URL,
++                LATEST_API_CHINESE_URL
++            )
++            for (url in directUrls) {
++                val data = runCatching {
++                    withRetry(logTag = "LauncherUpgrade", maxRetries = 1) {
++                        GLOBAL_CLIENT.get(url) {
++                            timeout {
++                                requestTimeoutMillis = 8_000
++                                connectTimeoutMillis = 5_000
++                            }
++                        }.safeBodyAsJson<RemoteData>()
++                    }
++                }.getOrNull()
++                if (data != null) {
++                    Logger.info(TAG, "Launcher upgrade info fetched from: $url")
++                    return@withContext data
++                }
++                Logger.warning(TAG, "Update source unavailable: $url")
++            }
++
++            //最后回退 GitHub Contents API（内容为 Base64，需要解码）
+             runCatching {
+-                withRetry(logTag = "LauncherUpgrade", maxRetries = 2) {
+-                    //获取最新的启动器信息
+-                    val api = GLOBAL_CLIENT.get(LATEST_API_URL).safeBodyAsJson<GithubContentApi>()
+-                    //需要Base64解密
++                withRetry(logTag = "LauncherUpgrade", maxRetries = 1) {
++                    val api = GLOBAL_CLIENT.get(LATEST_API_URL) {
++                        timeout {
++                            requestTimeoutMillis = 8_000
++                            connectTimeoutMillis = 5_000
++                        }
++                    }.safeBodyAsJson<GithubContentApi>()
+                     val contentString = decodeBase64(api.content)
+                     GLOBAL_JSON.decodeFromString(RemoteData.serializer(), contentString)
+                 }
+             }.getOrElse { e ->
+-                if (Locale.getDefault().language == "zh") {
+-                    runCatching {
+-                        Logger.info(TAG, "Check for updates in the Chinese region.")
+-                        //在中国地区，可能因为无法访问 Github API 导致获取更新信息失败
+-                        withRetry(logTag = "LauncherUpgrade_Chinese", maxRetries = 2) {
+-                            GLOBAL_CLIENT.get(LATEST_API_CHINESE_URL).safeBodyAsJson<RemoteData>()
+-                        }
+-                    }.getOrElse { e ->
+-                        Logger.warning(TAG, "Failed to check for launcher upgrade!", e)
+-                        null
+-                    }
+-                } else {
+-                    Logger.warning(TAG, "Failed to check for launcher upgrade!", e)
+-                    null
+-                }
++                Logger.warning(TAG, "Failed to check for launcher upgrade!", e)
++                null
+             }
+         }
+     }
 diff --git a/ZalithLauncher/src/main/java/com/movtery/zalithlauncher/viewmodel/ModpackImportViewModel.kt b/ZalithLauncher/src/main/java/com/movtery/zalithlauncher/viewmodel/ModpackImportViewModel.kt
 index 279d1f0..c6b8d41 100644
 --- a/ZalithLauncher/src/main/java/com/movtery/zalithlauncher/viewmodel/ModpackImportViewModel.kt
