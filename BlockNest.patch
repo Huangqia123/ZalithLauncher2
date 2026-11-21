@@ -248,6 +248,39 @@ index 05bafc3..0000000
 -          name: BlockNest-debug-universal
 -          path: ZalithLauncher/build/outputs/apk/debug/*.apk
 -          if-no-files-found: error
+diff --git a/.github/workflows/build-blocknest.yml b/.github/workflows/build-blocknest.yml
+index 7f10136..20607da 100644
+--- a/.github/workflows/build-blocknest.yml
++++ b/.github/workflows/build-blocknest.yml
+@@ -57,13 +57,13 @@ jobs:
+       - name: Build Debug APK (arm64)
+         run: |
+           chmod +x gradlew
+-          ./gradlew ZalithLauncher:assembleDebug -Darch=arm64 --stacktrace
++          ./gradlew ZalithLauncher:assembleRelease -Darch=arm64 --stacktrace
+ 
+       - name: Upload APK
+         uses: actions/upload-artifact@v4
+         with:
+           name: BlockNest-debug-arm64
+-          path: ZalithLauncher/build/outputs/apk/debug/*.apk
++          path: ZalithLauncher/build/outputs/apk/release/*.apk
+           if-no-files-found: error
+ 
+   build-all-arch:
+@@ -108,10 +108,10 @@ jobs:
+       - name: Build universal Debug APK
+         run: |
+           chmod +x gradlew
+-          ./gradlew ZalithLauncher:assembleDebug -Darch=all --stacktrace
++          ./gradlew ZalithLauncher:assembleRelease -Darch=all --stacktrace
+       - name: Upload universal APK
+         uses: actions/upload-artifact@v4
+         with:
+           name: BlockNest-debug-universal
+-          path: ZalithLauncher/build/outputs/apk/debug/*.apk
++          path: ZalithLauncher/build/outputs/apk/release/*.apk
+           if-no-files-found: error
 diff --git a/.github/workflows/build.yml b/.github/workflows/build.yml
 new file mode 100644
 index 0000000..abe7adc
@@ -369,10 +402,10 @@ index 0000000..abe7adc
 +          path: ZalithLauncher/build/outputs/apk/debug/*.apk
 diff --git a/.github/workflows/publish-release.yml b/.github/workflows/publish-release.yml
 deleted file mode 100644
-index e7ae3e7..0000000
+index ca6179d..0000000
 --- a/.github/workflows/publish-release.yml
 +++ /dev/null
-@@ -1,49 +0,0 @@
+@@ -1,56 +0,0 @@
 -name: Publish BlockNest Release
 -
 -on:
@@ -392,7 +425,7 @@ index e7ae3e7..0000000
 -        run: |
 -          set -e
 -          mkdir -p out
--          gh run download 43580474252 -n BlockNest-debug-arm64 -D out --repo ${{ github.repository }}
+-          gh run download 44849710142 -n BlockNest-debug-arm64 -D out --repo ${{ github.repository }}
 -          cd out
 -          ls -la
 -          rm -f *.crdownload || true
@@ -400,27 +433,34 @@ index e7ae3e7..0000000
 -      - name: Create release with APK
 -        uses: softprops/action-gh-release@v2
 -        with:
--          tag_name: v2.7.2-blocknest.1
--          name: "BlockNest 2.7.2 (衍生构建) — 修复关于页与更新源"
+-          tag_name: v2.8.2-blocknest.2
+-          name: "BlockNest 2.8.2 (衍生构建) — 内置 LittleSkin 登录 + 修复检查更新"
 -          prerelease: true
 -          body: |
--            ## BlockNest 2.7.2（基于 ZalithLauncher2 的衍生构建）
+-            ## BlockNest 2.8.2（基于 ZalithLauncher2 的衍生构建）
 -
--            本版本基于 [ZalithLauncher2](https://github.com/ZalithLauncher/ZalithLauncher2) 二次开发，遵循 GNU GPL v3。
+-            本版本基于官方 **ZalithLauncher2 2.8.2（versionCode 200049）** 二次开发，遵循 GNU GPL v3。
 -
--            ### 本次修复
--            - 设置 → 关于 → **项目地址**：改指向本仓库（不再跳官方 ZalithLauncher2）
--            - **检查更新**：更新源指向本仓库 `update/v2/latest_version_md.json`，不再调用官方 Zalith-Info 与 miawa.cn 镜像
--            - 已移除原仓库自带的官方 CI 工作流
+-            ### 本次更新
+-            - **账号登录列表内置 LittleSkin**：点「添加账号」第一项即为 LittleSkin，输入邮箱与密码即可登录；
+-              无需再手动「添加认证服务器」并填写 API 地址。首次启动会自动登记进本地服务器表。
+-            - **修复「获取更新失败，请稍后再试」**：更新信息改为多源顺序回退
+-              （jsDelivr → ghfast 镜像 → raw.githubusercontent → GitHub Contents API），国内网络下也能正常检查更新。
+-            - 补全仓库内缺失的 `update/v2/latest_version_md.json`（此前该文件不存在，导致更新源 404）。
+-
+-            ### 版本信息
+-            - 显示名 BlockNest，包名 `com.blocknest.launcher`
+-            - versionName `2.8.2-blocknest.2`，versionCode `200050`
+-            - 底层源码为官方 2.8.2（200049）
 -
 -            ### 安装包
--            - `BlockNest-Debug-2.7.2-arm64-v8a.apk`（arm64-v8a，适用于绝大多数现代安卓手机/平板）
--            - 包名 `com.blocknest.launcher`
+-            - `BlockNest-Debug-2.8.2-arm64-v8a.apk`（arm64-v8a，适用于绝大多数现代安卓手机/平板）
 -            - 调试签名包，安装前请允许「未知来源」
 -
 -            ### 说明
 -            - 应用名 BlockNest、全新图标、青绿主题色板
--            - 上游功能与协议保持一致，仅为界面与品牌层改造
+-            - 上游功能与协议保持一致，仅为界面、品牌层与上述修复改造
+-            完整修改声明见 `MODIFICATIONS.md`。
 -          files: out/*.apk
 diff --git a/.github/workflows/push_ci.yml b/.github/workflows/push_ci.yml
 new file mode 100644
@@ -1547,10 +1587,10 @@ index d3932e5..17d12f4 100644
  }
 diff --git a/MODIFICATIONS.md b/MODIFICATIONS.md
 new file mode 100644
-index 0000000..6607676
+index 0000000..e98acbc
 --- /dev/null
 +++ b/MODIFICATIONS.md
-@@ -0,0 +1,21 @@
+@@ -0,0 +1,24 @@
 +# 修改说明（GPL-3.0 第 5 条要求）
 +
 +本项目是 **ZalithLauncher2**（https://github.com/ZalithLauncher/ZalithLauncher2）的衍生版本。
@@ -1570,6 +1610,9 @@ index 0000000..6607676
 +     - 服务端信息来自官方 `https://littleskin.cn/api/yggdrasil`（读取 `meta.serverName` / `meta.links.register`）
 +     - 首次启动时自动将该服务器登记进本地 `servers` 表（`AccountsManager.reloadAuthServers()`），内置项不在服务器列表内显示、也不提供删除入口
 +  8. 【v2.8.2-blocknest.2】版本号调整为 `2.8.2-blocknest.2`（versionCode 200050），更新源自检同步
++
++9. 【v2.8.2-blocknest.3】release 构建改用仓库自带 debug keystore 签名（CI 无上游私有 release keystore 密码），
++     第三版以 R8 优化后的 release 包发布，修复 debug 包 UI 滑动卡顿；版本号 200051
 +
 +本衍生版本同样以 GPL-3.0 发布，完整源码随发行一同提供。
 diff --git a/README-BUILD.md b/README-BUILD.md
@@ -1623,7 +1666,7 @@ index 6ec025e..df55ffe 100644
  ![Downloads](https://img.shields.io/github/downloads/ZalithLauncher/ZalithLauncher2/total)
  [![Sponsor](https://img.shields.io/badge/sponsor-30363D?logo=GitHub-Sponsors)](https://afdian.com/a/MovTery)
 diff --git a/ZalithLauncher/build.gradle.kts b/ZalithLauncher/build.gradle.kts
-index e808483..e7087e4 100644
+index e808483..aed4eea 100644
 --- a/ZalithLauncher/build.gradle.kts
 +++ b/ZalithLauncher/build.gradle.kts
 @@ -1,7 +1,9 @@
@@ -1724,7 +1767,19 @@ index e808483..e7087e4 100644
          minSdk = 26
          targetSdk = 34
          versionCode = launcherVersionCode
-@@ -167,41 +232,46 @@ androidComponents {
+@@ -77,7 +142,10 @@ android {
+         release {
+             isMinifyEnabled = true
+             isShrinkResources = true
+-            signingConfig = signingConfigs.getByName("releaseBuild")
++            //BlockNest：CI 环境无上游私有 release keystore 密码，
++            //改用仓库自带的 debug keystore 签名 release 优化包（R8 + 资源压缩），
++            //以解决 debug 包未优化导致的 UI 滑动卡顿。
++            signingConfig = signingConfigs.getByName("debugBuild")
+             proguardFiles(
+                 getDefaultProguardFile("proguard-android-optimize.txt"),
+                 "proguard-rules.pro"
+@@ -167,41 +235,46 @@ androidComponents {
                              }
                          }
  
@@ -1800,7 +1855,7 @@ index e808483..e7087e4 100644
                  }
  
 diff --git a/ZalithLauncher/gradle.properties b/ZalithLauncher/gradle.properties
-index b0f3e16..c6ede07 100644
+index b0f3e16..82b6e15 100644
 --- a/ZalithLauncher/gradle.properties
 +++ b/ZalithLauncher/gradle.properties
 @@ -1,8 +1,8 @@
@@ -1823,8 +1878,8 @@ index b0f3e16..c6ede07 100644
 -launcher_version_code=200046
 -launcher_version_name=2.7.2
 \ No newline at end of file
-+launcher_version_code=200050
-+launcher_version_name=2.8.2-blocknest.2
++launcher_version_code=200051
++launcher_version_name=2.8.2-blocknest.3
 \ No newline at end of file
 diff --git a/ZalithLauncher/src/main/assets/app_runtime/lwjgl/3.3.3/version b/ZalithLauncher/src/main/assets/app_runtime/lwjgl/3.3.3/version
 deleted file mode 100644
