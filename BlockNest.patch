@@ -249,10 +249,20 @@ index 05bafc3..0000000
 -          path: ZalithLauncher/build/outputs/apk/debug/*.apk
 -          if-no-files-found: error
 diff --git a/.github/workflows/build-blocknest.yml b/.github/workflows/build-blocknest.yml
-index 7f10136..20607da 100644
+index 7f10136..e6baf98 100644
 --- a/.github/workflows/build-blocknest.yml
 +++ b/.github/workflows/build-blocknest.yml
-@@ -57,13 +57,13 @@ jobs:
+@@ -2,6 +2,9 @@ name: Build BlockNest APK
+ 
+ on:
+   workflow_dispatch:
++  push:
++    paths:
++      - '.github/workflows/build-blocknest.yml'
+ 
+ permissions:
+   contents: read
+@@ -57,13 +60,13 @@ jobs:
        - name: Build Debug APK (arm64)
          run: |
            chmod +x gradlew
@@ -268,7 +278,7 @@ index 7f10136..20607da 100644
            if-no-files-found: error
  
    build-all-arch:
-@@ -108,10 +108,10 @@ jobs:
+@@ -108,10 +111,10 @@ jobs:
        - name: Build universal Debug APK
          run: |
            chmod +x gradlew
