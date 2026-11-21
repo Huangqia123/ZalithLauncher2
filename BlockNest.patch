@@ -123,6 +123,132 @@ index 05bafc3..0000000
 -          name: BlockNest-debug-universal
 -          path: ZalithLauncher/build/outputs/apk/debug/*.apk
 -          if-no-files-found: error
+diff --git a/.github/workflows/.github/workflows/.github/workflows/.github/workflows/.github/workflows/.github/workflows/.github/workflows/.github/workflows/build-blocknest.yml b/.github/workflows/.github/workflows/.github/workflows/.github/workflows/.github/workflows/.github/workflows/.github/workflows/.github/workflows/build-blocknest.yml
+deleted file mode 100644
+index e6baf98..0000000
+--- a/.github/workflows/.github/workflows/.github/workflows/.github/workflows/.github/workflows/.github/workflows/.github/workflows/.github/workflows/build-blocknest.yml
++++ /dev/null
+@@ -1,120 +0,0 @@
+-name: Build BlockNest APK
+-
+-on:
+-  workflow_dispatch:
+-  push:
+-    paths:
+-      - '.github/workflows/build-blocknest.yml'
+-
+-permissions:
+-  contents: read
+-
+-jobs:
+-  build:
+-    runs-on: ubuntu-latest
+-    steps:
+-      - name: Checkout
+-        uses: actions/checkout@v4
+-        with:
+-          submodules: recursive
+-
+-      - name: Apply BlockNest patch (if present)
+-        run: |
+-          if [ -f BlockNest.patch ]; then
+-            git apply --binary BlockNest.patch
+-            echo "BlockNest.patch applied"
+-          else
+-            echo "no patch file, building repository as-is"
+-          fi
+-
+-      - name: Set up JDK 21
+-        uses: actions/setup-java@v4
+-        with:
+-          distribution: "temurin"
+-          java-version: "21"
+-
+-      - name: Setup Gradle
+-        uses: gradle/actions/setup-gradle@v4
+-
+-      - name: Setup Rust toolchain
+-        uses: dtolnay/rust-toolchain@stable
+-        with:
+-          targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+-
+-      - name: Install cargo-ndk
+-        run: |
+-          version="4.1.2"
+-          curl -sL "https://github.com/bbqsrc/cargo-ndk/releases/download/v${version}/cargo-ndk-x86_64-unknown-linux-gnu-v${version}.tgz" |
+-            tar xz -C "$HOME/.cargo/bin" --strip-components=1
+-          chmod +x "$HOME/.cargo/bin"/cargo-ndk*
+-
+-      - name: Setup Android NDK
+-        run: |
+-          ndk=$(ls -d "$ANDROID_HOME"/ndk/* 2>/dev/null | sort -V | tail -1)
+-          if [ -z "$ndk" ] || [ ! -f "$ndk/source.properties" ]; then
+-            sdkmanager --install "ndk;27.0.12077973"
+-            ndk=$(ls -d "$ANDROID_HOME"/ndk/* | sort -V | tail -1)
+-          fi
+-          echo "ANDROID_NDK_HOME=$ndk" >> "$GITHUB_ENV"
+-
+-      - name: Build Debug APK (arm64)
+-        run: |
+-          chmod +x gradlew
+-          ./gradlew ZalithLauncher:assembleRelease -Darch=arm64 --stacktrace
+-
+-      - name: Upload APK
+-        uses: actions/upload-artifact@v4
+-        with:
+-          name: BlockNest-debug-arm64
+-          path: ZalithLauncher/build/outputs/apk/release/*.apk
+-          if-no-files-found: error
+-
+-  build-all-arch:
+-    runs-on: ubuntu-latest
+-    if: github.event_name == 'workflow_dispatch'
+-    strategy:
+-      fail-fast: false
+-      matrix:
+-        arch: [ "all" ]
+-    steps:
+-      - uses: actions/checkout@v4
+-        with:
+-          submodules: recursive
+-      - name: Apply BlockNest patch (if present)
+-        run: |
+-          if [ -f BlockNest.patch ]; then
+-            git apply --binary BlockNest.patch
+-            echo "BlockNest.patch applied"
+-          fi
+-      - uses: actions/setup-java@v4
+-        with:
+-          distribution: "temurin"
+-          java-version: "21"
+-      - uses: gradle/actions/setup-gradle@v4
+-      - uses: dtolnay/rust-toolchain@stable
+-        with:
+-          targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+-      - name: Install cargo-ndk
+-        run: |
+-          version="4.1.2"
+-          curl -sL "https://github.com/bbqsrc/cargo-ndk/releases/download/v${version}/cargo-ndk-x86_64-unknown-linux-gnu-v${version}.tgz" |
+-            tar xz -C "$HOME/.cargo/bin" --strip-components=1
+-          chmod +x "$HOME/.cargo/bin"/cargo-ndk*
+-      - name: Setup Android NDK
+-        run: |
+-          ndk=$(ls -d "$ANDROID_HOME"/ndk/* 2>/dev/null | sort -V | tail -1)
+-          if [ -z "$ndk" ] || [ ! -f "$ndk/source.properties" ]; then
+-            sdkmanager --install "ndk;27.0.12077973"
+-            ndk=$(ls -d "$ANDROID_HOME"/ndk/* | sort -V | tail -1)
+-          fi
+-          echo "ANDROID_NDK_HOME=$ndk" >> "$GITHUB_ENV"
+-      - name: Build universal Debug APK
+-        run: |
+-          chmod +x gradlew
+-          ./gradlew ZalithLauncher:assembleRelease -Darch=all --stacktrace
+-      - name: Upload universal APK
+-        uses: actions/upload-artifact@v4
+-        with:
+-          name: BlockNest-debug-universal
+-          path: ZalithLauncher/build/outputs/apk/release/*.apk
+-          if-no-files-found: error
 diff --git a/.github/workflows/.github/workflows/build-blocknest.yml b/.github/workflows/.github/workflows/build-blocknest.yml
 deleted file mode 100644
 index 05bafc3..0000000
@@ -248,49 +374,6 @@ index 05bafc3..0000000
 -          name: BlockNest-debug-universal
 -          path: ZalithLauncher/build/outputs/apk/debug/*.apk
 -          if-no-files-found: error
-diff --git a/.github/workflows/build-blocknest.yml b/.github/workflows/build-blocknest.yml
-index 7f10136..e6baf98 100644
---- a/.github/workflows/build-blocknest.yml
-+++ b/.github/workflows/build-blocknest.yml
-@@ -2,6 +2,9 @@ name: Build BlockNest APK
- 
- on:
-   workflow_dispatch:
-+  push:
-+    paths:
-+      - '.github/workflows/build-blocknest.yml'
- 
- permissions:
-   contents: read
-@@ -57,13 +60,13 @@ jobs:
-       - name: Build Debug APK (arm64)
-         run: |
-           chmod +x gradlew
--          ./gradlew ZalithLauncher:assembleDebug -Darch=arm64 --stacktrace
-+          ./gradlew ZalithLauncher:assembleRelease -Darch=arm64 --stacktrace
- 
-       - name: Upload APK
-         uses: actions/upload-artifact@v4
-         with:
-           name: BlockNest-debug-arm64
--          path: ZalithLauncher/build/outputs/apk/debug/*.apk
-+          path: ZalithLauncher/build/outputs/apk/release/*.apk
-           if-no-files-found: error
- 
-   build-all-arch:
-@@ -108,10 +111,10 @@ jobs:
-       - name: Build universal Debug APK
-         run: |
-           chmod +x gradlew
--          ./gradlew ZalithLauncher:assembleDebug -Darch=all --stacktrace
-+          ./gradlew ZalithLauncher:assembleRelease -Darch=all --stacktrace
-       - name: Upload universal APK
-         uses: actions/upload-artifact@v4
-         with:
-           name: BlockNest-debug-universal
--          path: ZalithLauncher/build/outputs/apk/debug/*.apk
-+          path: ZalithLauncher/build/outputs/apk/release/*.apk
-           if-no-files-found: error
 diff --git a/.github/workflows/build.yml b/.github/workflows/build.yml
 new file mode 100644
 index 0000000..abe7adc
